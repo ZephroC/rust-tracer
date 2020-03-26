@@ -1,0 +1,12 @@
+[package]
+name = "rust-tracer"
+version = "0.1.0"
+authors = ["ZephroC <iain.d.walsh@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ggez = "0.5.1"
+nalgebra = { version = "0.20.0", features=["mint"]}
+
