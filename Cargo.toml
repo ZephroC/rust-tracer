@@ -10,3 +10,4 @@ edition = "2018"
 ggez = "0.5.1"
 nalgebra = { version = "0.20.0", features=["mint"]}
 getopts = "0.2"
+serde_yaml = "0.8.11"

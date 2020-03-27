@@ -1,0 +1,42 @@
+camera:
+  fov: 90.0
+  pos:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  dir:
+    x: 0.0
+    y: 0.0
+    z: -1.0
+  screen:
+    height: 9.0
+    width: 16.0
+    distance: 8.0
+spheres:
+  - radius: 8.0
+    pos:
+      x: 6.0
+      y: -2.0
+      z: 24.0
+    colour:
+      r: 255
+      g: 255
+      b: 0
+  - radius: 12.0
+    pos:
+      x: 24.0
+      y: -7.0
+      z: 32.0
+    colour:
+      r: 255
+      g: 0
+      b: 255
+planes:
+  - vec:
+      x: 1.0
+      y: 0.0
+      z: 0.0
+    pos:
+      x: 0.0
+      y: 0.0
+      z: 0.0
