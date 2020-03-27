@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 ggez = "0.5.1"
 nalgebra = { version = "0.20.0", features=["mint"]}
-
+getopts = "0.2"
