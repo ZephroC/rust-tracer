@@ -17,7 +17,7 @@ impl Sphere {
             radius,
             material: Material {
                 rgb: colour,
-                diffuse: 1.0
+                diffuse: 0.6
             }
         }
     }
@@ -44,8 +44,17 @@ impl Intersects for Sphere {
             let numerator = -b - discriminant.sqrt();
             if numerator > 0.0 {
                 let dist = numerator / (2.0 * a);
+                // println!("Ray origin: {:?}",ray.orig);
+                // println!("Ray dir: {:?}",ray.dir);
+                let hit_point = ray.point_along(dist);
 
-                (dist, Some((&ray.dir * dist - &self.pos).normalize()))
+                // if hit_point[1] > 2.9 && hit_point[2] > 5.9 && hit_point[2] < 6.1 {
+                //     println!("Ray origin: {:?}",ray.orig);
+                //     println!("Ray dir: {:?}",ray.dir);
+                //     println!("hit point according to sphere: {:?}",hit_point);
+                // }
+
+                (dist, Some((&ray.point_along(dist)  - &self.pos).normalize()))
             }
             else {
                 (-1.0, None)
@@ -79,7 +88,19 @@ mod tests {
         approx::assert_ulps_eq!(0.0, norm.unwrap()[0],max_ulps = 3);
         approx::assert_ulps_eq!(0.0, norm.unwrap()[1],max_ulps = 3);
         approx::assert_ulps_eq!(-1.0, norm.unwrap()[2],max_ulps = 3);
+        approx::assert_ulps_eq!(1.0, norm.unwrap().magnitude() , max_ulps=3);
 
+        let sphere = Sphere::new(Vector3::new(2.0,2.0,0.0), 1.0, RGB{r:0,g:0,b:0});
+        let ray = Ray{
+            orig: Vector3::new(0.0,0.0,0.0),
+            dir: Vector3::new(1.0, 1.0, 0.0)
+        };
+        let angle = (45.0_f64).to_radians();
+        let (dist,norm) = sphere.intersect(&ray);
+        approx::assert_ulps_eq!(dist, 2.0 - angle.cos(), max_ulps =  3);
+        approx::assert_ulps_eq!( -angle.cos(), norm.unwrap()[0],max_ulps = 3);
+        approx::assert_ulps_eq!(-angle.cos(), norm.unwrap()[1],max_ulps = 3);
+        approx::assert_ulps_eq!(0.0, norm.unwrap()[2],max_ulps = 3);
     }
 
 }

@@ -38,8 +38,8 @@ planes:
       z: 0.0
 point_lights:
   - pos:
-      x: 8.0
-      y: 10.0
+      x: -3.0
+      y: 12.0
       z: 0.0
     colour:
       r: 255
