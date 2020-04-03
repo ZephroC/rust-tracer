@@ -1,16 +1,6 @@
 use getopts::Options;
 use std::string::ToString;
-
-fn print_usage(opts: Options) {
-    let brief = format!("Usage: {} FILE [options]", "rust-tracer");
-    print!("{}", opts.usage(&brief));
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Resolution {
-    pub width: u16,
-    pub height: u16,
-}
+use crate::Resolution;
 
 pub struct Config {
     pub filename: String,
@@ -47,4 +37,10 @@ pub fn parse_args(args: Vec<String>) -> Config {
         threads,
         resolution: Resolution { width, height },
     }
+}
+
+
+fn print_usage(opts: Options) {
+    let brief = format!("Usage: {} FILE [options]", "rust-tracer");
+    print!("{}", opts.usage(&brief));
 }

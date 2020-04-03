@@ -1733,6 +1733,7 @@ dependencies = [
 name = "rust-tracer"
 version = "0.1.0"
 dependencies = [
+ "approx",
  "getopts",
  "ggez",
  "nalgebra 0.20.0",

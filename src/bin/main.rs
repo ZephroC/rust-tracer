@@ -1,20 +1,14 @@
-use std::collections::BTreeMap;
 use std::env;
 
 use ggez::GameResult;
 use nalgebra::Vector3;
 use serde_yaml::Value;
 
-use crate::sub_modules::tracer::{Camera, Intersects, SceneState, Screen, Sphere, RGB};
-use crate::sub_modules::window::WindowState;
-use crate::sub_modules::{config, window};
-
-mod sub_modules;
-
-struct SceneFile {
-    camera: Camera,
-    spheres: [Sphere],
-}
+use rust_tracer::{window, config};
+use rust_tracer::tracer::{Camera, SceneState, PointLight};
+use rust_tracer::tracer::geom::sphere::Sphere;
+use rust_tracer::tracer::geom::Drawable;
+use rust_tracer::tracer::colour::RGB;
 
 fn unwrap_xyz(xyz: &serde_yaml::Value) -> Vector3<f64> {
     nalgebra::Vector3::new(
@@ -42,23 +36,26 @@ pub fn main() -> GameResult {
     let camera = Camera {
         pos: unwrap_xyz(&camera["pos"]),
         dir: unwrap_xyz(&camera["dir"]),
-        fov: camera["fov"].as_f64().unwrap(),
-        screen: Screen {
-            height: camera["screen"]["height"].as_f64().unwrap(),
-            width: camera["screen"]["width"].as_f64().unwrap(),
-            distance: camera["screen"]["distance"].as_f64().unwrap(),
-        },
+        fov: camera["fov"].as_f64().unwrap()
     };
-    let mut geom: Vec<Box<dyn Intersects>> = vec![];
+    let mut geom: Vec<Box<dyn Drawable>> = vec![];
+    let mut point_lights: Vec<PointLight> = vec![];
 
     for sphere in deserialised["spheres"].as_sequence().unwrap() {
-        geom.push(Box::new(Sphere {
-            pos: unwrap_xyz(&sphere["pos"]),
-            radius: sphere["radius"].as_f64().unwrap(),
-            colour: unwrap_rgb(&sphere["colour"]),
-        }));
+        geom.push(Box::new(Sphere::new (
+            unwrap_xyz(&sphere["pos"]),
+            sphere["radius"].as_f64().unwrap(),
+            unwrap_rgb(&sphere["colour"]),
+        )));
     }
 
-    let scene = SceneState { geom, camera };
-    window::run(&mut WindowState::new(config.resolution, &scene))
+    for point_light in deserialised["point_lights"].as_sequence().unwrap() {
+        point_lights.push(PointLight {
+            pos: unwrap_xyz(&point_light["pos"]),
+            colour: unwrap_rgb(&point_light["colour"]),
+        });
+    }
+
+    let scene = SceneState { geom, point_lights, camera };
+    window::run(config.resolution,&scene)
 }
