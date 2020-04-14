@@ -9,6 +9,7 @@ use rust_tracer::tracer::{Camera, SceneState, PointLight};
 use rust_tracer::tracer::geom::sphere::Sphere;
 use rust_tracer::tracer::geom::Drawable;
 use rust_tracer::tracer::colour::RGB;
+use rust_tracer::tracer::geom::plane::Plane;
 
 fn unwrap_xyz(xyz: &serde_yaml::Value) -> Vector3<f64> {
     nalgebra::Vector3::new(
@@ -46,6 +47,14 @@ pub fn main() -> GameResult {
             unwrap_xyz(&sphere["pos"]),
             sphere["radius"].as_f64().unwrap(),
             unwrap_rgb(&sphere["colour"]),
+        )));
+    }
+
+    for plane in deserialised["planes"].as_sequence().unwrap() {
+        geom.push(Box::new(Plane::new (
+            unwrap_xyz(&plane["pos"]),
+            unwrap_xyz(&plane["norm"]),
+            unwrap_rgb(&plane["colour"]),
         )));
     }
 

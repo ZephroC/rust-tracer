@@ -50,6 +50,10 @@ impl event::EventHandler for WindowState<'_> {
         Ok(())
     }
 
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+        false
+    }
+
     fn draw(&mut self, _ctx: &mut Context) -> GameResult {
         graphics::clear(_ctx, [0.0, 0.0, 0.0, 1.0].into());
 

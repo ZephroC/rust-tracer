@@ -122,7 +122,7 @@ impl SceneState {
     }
 
     fn colour_for_hit(&self, hit_info: HitInformation) -> Option<RGB> {
-        let ambient = 0.2;
+        let ambient = 0.1;
         let mut colour_pts:Vec<RGB> = Vec::new();
         for light in &self.point_lights {
             let mut in_shadow  = false;

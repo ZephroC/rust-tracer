@@ -1,4 +1,6 @@
 pub mod sphere;
+pub mod plane;
+
 
 use nalgebra::Vector3;
 

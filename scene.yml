@@ -3,7 +3,7 @@ camera:
   pos:
     x: 0.0
     y: 0.0
-    z: -3.0
+    z: -5.0
   dir:
     x: 0.0
     y: 0.0
@@ -20,7 +20,7 @@ spheres:
       b: 255
   - radius: 3.0
     pos:
-      x: 3.0
+      x: 1.0
       y: 3.0
       z: 9.0
     colour:
@@ -28,18 +28,34 @@ spheres:
       g: 255
       b: 0
 planes:
-  - vec:
-      x: 1.0
-      y: 0.0
+  - norm:
+      x: 0.0
+      y: 1.0
       z: 0.0
     pos:
       x: 0.0
-      y: 0.0
+      y: -4.0
       z: 0.0
+    colour:
+      r: 255
+      g: 255
+      b: 255
+  - norm:
+      x: 0.0
+      y: 0.0
+      z: -1.0
+    pos:
+      x: 0.0
+      y: 0.0
+      z: 16.0
+    colour:
+      r: 255
+      g: 128
+      b: 0
 point_lights:
   - pos:
       x: -3.0
-      y: 12.0
+      y: 1.0
       z: 0.0
     colour:
       r: 255
