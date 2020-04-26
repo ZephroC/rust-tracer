@@ -11,13 +11,14 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(pos: Vector3<f64>, radius: f64, colour: RGB) -> Sphere {
+    pub fn new(pos: Vector3<f64>, radius: f64, colour: RGB, diffuse:f64, specular:f64) -> Sphere {
         Sphere {
             pos,
             radius,
             material: Material {
                 rgb: colour,
-                diffuse: 0.6
+                diffuse,
+                specular
             }
         }
     }
@@ -44,16 +45,6 @@ impl Intersects for Sphere {
             let numerator = -b - discriminant.sqrt();
             if numerator > 0.0 {
                 let dist = numerator / (2.0 * a);
-                // println!("Ray origin: {:?}",ray.orig);
-                // println!("Ray dir: {:?}",ray.dir);
-                let hit_point = ray.point_along(dist);
-
-                // if hit_point[1] > 2.9 && hit_point[2] > 5.9 && hit_point[2] < 6.1 {
-                //     println!("Ray origin: {:?}",ray.orig);
-                //     println!("Ray dir: {:?}",ray.dir);
-                //     println!("hit point according to sphere: {:?}",hit_point);
-                // }
-
                 (dist, Some((&ray.point_along(dist)  - &self.pos).normalize()))
             }
             else {

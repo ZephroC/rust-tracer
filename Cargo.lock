@@ -1737,6 +1737,7 @@ dependencies = [
  "getopts",
  "ggez",
  "nalgebra 0.20.0",
+ "rand 0.7.3",
  "serde_yaml",
 ]
 

@@ -46,25 +46,31 @@ pub fn main() -> GameResult {
         geom.push(Box::new(Sphere::new (
             unwrap_xyz(&sphere["pos"]),
             sphere["radius"].as_f64().unwrap(),
-            unwrap_rgb(&sphere["colour"]),
-        )));
+            unwrap_rgb(&sphere["material"]["colour"]),
+            sphere["material"]["diffuse"].as_f64().unwrap(),
+           sphere["material"]["specular"].as_f64().unwrap()
+            )
+        ));
     }
 
     for plane in deserialised["planes"].as_sequence().unwrap() {
         geom.push(Box::new(Plane::new (
             unwrap_xyz(&plane["pos"]),
             unwrap_xyz(&plane["norm"]),
-            unwrap_rgb(&plane["colour"]),
-        )));
+            unwrap_rgb(&plane["material"]["colour"]),
+            plane["material"]["diffuse"].as_f64().unwrap(),
+            plane["material"]["specular"].as_f64().unwrap()        )));
     }
 
     for point_light in deserialised["point_lights"].as_sequence().unwrap() {
         point_lights.push(PointLight {
             pos: unwrap_xyz(&point_light["pos"]),
             colour: unwrap_rgb(&point_light["colour"]),
+            intensity: point_light["intensity"].as_f64().unwrap()
         });
     }
-
-    let scene = SceneState { geom, point_lights, camera };
-    window::run(config.resolution,&scene)
+    let ambient = deserialised["ambient"].as_f64().unwrap();
+    let background = unwrap_rgb(&deserialised["background"]);
+    let scene = SceneState { geom, point_lights, camera, ambient, background_colour: background };
+    window::run(config.resolution,&scene, config.samples)
 }

@@ -11,6 +11,7 @@ ggez = "0.5.1"
 nalgebra = { version = "0.20.0", features=["mint"]}
 getopts = "0.2"
 serde_yaml = "0.8.11"
+rand = "0.7.3"
 
 [dev-dependencies]
 approx = "0.3.2"

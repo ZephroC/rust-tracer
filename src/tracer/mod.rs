@@ -2,10 +2,10 @@ use nalgebra::Vector3;
 
 use colour::RGB;
 use geom::Drawable;
+use rand::prelude::*;
 
 use crate::Resolution;
 use crate::tracer::colour::Material;
-use std::cmp::max;
 
 pub mod geom;
 pub mod colour;
@@ -37,12 +37,15 @@ impl Ray {
 pub struct PointLight {
     pub pos: Vector3<f64>,
     pub colour: RGB,
+    pub intensity:f64
 }
 
 pub struct SceneState {
     pub geom: Vec<Box<dyn Drawable>>,
     pub point_lights: Vec<PointLight>,
     pub camera: Camera,
+    pub ambient: f64,
+    pub background_colour:RGB
 }
 
 struct HitInformation<'a> {
@@ -53,77 +56,109 @@ struct HitInformation<'a> {
 }
 
 impl SceneState {
-    pub fn rasterise(&self, frame: &mut Vec<u8>, res: &Resolution) {
+    pub fn rasterise(&self, frame: &mut Vec<u8>, res: &Resolution, samples:u8) {
         let width = res.width;
         let height = res.height;
         let (top_left, x_stride, y_stride) = screen_to_coord_stride(width as f64, height as f64, &self.camera);
+        //find better seed for this later
+        let mut rng = rand::thread_rng();
+
         for y in 0..height {
             let y_pixel_pos = &top_left + (&y_stride * (y as f64));
             for x in 0..width {
-                let pixel_pos = y_pixel_pos + (&x_stride * (x as f64));
                 // let pixel_pos = screen_to_coord(x, y, width as f64, height as f64, &self.camera);
-                let ray = Ray::new(
-                    self.camera.pos,
-                    pixel_pos - &self.camera.pos,
-                );
+                let mut r_total:u32 = 0;
+                let mut g_total:u32 = 0;
+                let mut b_total:u32 = 0;
 
-                let mut hit_info: Option<HitInformation> = None;
+                for sample in 0..samples {
+                    let rand_x:f64 = rng.gen();
+                    let rand_y:f64 = rng.gen();
 
-                for object in &self.geom {
-                    match object.intersect(&ray) {
-                        (hit, _) if hit < 0.0 => {}
-                        (dist, Some(normal)) => {
-                            match hit_info {
-                                None => {
-                                    let hit_point = ray.point_along(dist);
-                                    hit_info = Some(HitInformation {
-                                        dist: dist,
-                                        material: object.material_at(&hit_point),
-                                        point: hit_point,
-                                        normal: normal,
-                                    });
-                                }
-                                Some(prev_hit_info) if dist < prev_hit_info.dist => {
-                                    let hit_point = ray.point_along(dist);
-                                    hit_info = Some(HitInformation {
-                                        dist: dist,
-                                        material: object.material_at(&hit_point),
-                                        point: hit_point,
-                                        normal: normal,
-                                    });
-                                }
-                                Some(_) => {}
-                            }
-                        }
-                        (_, _) => {
-                            println!("Some weird error happened with object at {}, {}", x, y);
-                        }
-                    }
+                    let pixel_pos = if sample == 0 {
+                        y_pixel_pos + (&x_stride * (x as f64))
+                    } else {
+                        y_pixel_pos + (&x_stride * (x as f64)) + (&x_stride * rand_x) + (&y_stride * rand_y)
+                    };
+
+
+                    let ray = Ray::new(
+                        self.camera.pos,
+                        pixel_pos - &self.camera.pos,
+                    );
+                    let draw_colour = self.cast_ray(ray);
+                    r_total += draw_colour.r as u32;
+                    g_total += draw_colour.g as u32;
+                    b_total += draw_colour.b as u32;
                 }
-
-                let draw_colour = match hit_info {
-                    Some(info) => { self.colour_for_hit(info) }
-                    None => None
-                };
-
-                let draw_colour = match draw_colour {
-                    Some(actual_colour) => { actual_colour }
-                    None => RGB { r: 0, g: 0, b: 0 }
-                };
-
                 let array_loc: usize = ((x as u32 + (y as u32 * width as u32)) * 4) as usize;
                 //Need a better memcopy though kind of unsafe
-                frame[array_loc] = draw_colour.r;
-                frame[array_loc + 1] = draw_colour.g;
-                frame[array_loc + 2] = draw_colour.b;
+                frame[array_loc] = (r_total / samples as u32) as u8;
+                frame[array_loc + 1] = (g_total / samples as u32) as u8;
+                frame[array_loc + 2] = (b_total / samples as u32) as u8;
                 frame[array_loc + 3] = 255;
             }
         }
     }
 
-    fn colour_for_hit(&self, hit_info: HitInformation) -> Option<RGB> {
-        let ambient = 0.1;
+
+    fn cast_ray(&self, ray:Ray) -> RGB {
+        let mut hit_info: Option<HitInformation> = None;
+        for object in &self.geom {
+            match object.intersect(&ray) {
+                (hit, _) if hit < 0.0 => {}
+                (dist, Some(normal)) => {
+                    match hit_info {
+                        None => {
+                            let hit_point = ray.point_along(dist);
+                            hit_info = Some(HitInformation {
+                                dist: dist,
+                                material: object.material_at(&hit_point),
+                                point: hit_point,
+                                normal: normal,
+                            });
+                        }
+                        Some(prev_hit_info) if dist < prev_hit_info.dist => {
+                            let hit_point = ray.point_along(dist);
+                            hit_info = Some(HitInformation {
+                                dist: dist,
+                                material: object.material_at(&hit_point),
+                                point: hit_point,
+                                normal: normal,
+                            });
+                        }
+                        Some(_) => {}
+                    }
+                }
+                (_, _) => {
+                    println!("Some weird error happened with object");
+                }
+            }
+        }
+
+        //TODO this needs a tidy up, 2 matches like this. Blergh
+        let draw_colour = match hit_info {
+            Some(info) => { self.colour_for_hit(info, ray) }
+            None => None
+        };
+
+        let draw_colour = match draw_colour {
+            Some(actual_colour) => { actual_colour }
+            None => RGB {
+                r: self.background_colour.r,
+                g: self.background_colour.g,
+                b: self.background_colour.b
+            }
+        };
+        return draw_colour;
+    }
+
+    fn colour_for_hit(&self, hit_info: HitInformation, ray:Ray) -> Option<RGB> {
+        let ambient = self.ambient;
+        let ambient_colour:RGB = hit_info.material.rgb.multiply(ambient);
         let mut colour_pts:Vec<RGB> = Vec::new();
+        let reflect =  ray.dir - 2.0 * ray.dir.dot(&hit_info.normal) * hit_info.normal;
+
         for light in &self.point_lights {
             let mut in_shadow  = false;
             let hit_to_light: Vector3<f64> = light.pos - hit_info.point;
@@ -131,67 +166,52 @@ impl SceneState {
             let new_ray: Ray = Ray::new(Vector3::from_data(hit_info.point.data), hit_to_light);
             for object in &self.geom {
                 match object.intersect(&new_ray) {
-                    (dist, Some(norm)) if dist > 0.00005 && dist < light_dist => {
-
+                    (dist, Some(_norm)) if dist > 0.00005 && dist < light_dist => {
                         // println!("hit!");
-                        let next_hit_point = new_ray.point_along(dist);
-
-                        // // println!("Hit object: {:?}",object);
-                        // println!("Distance from hit: {}", dist);
-                        // println!("Distance from light: {}", light_dist);
-                        // println!("light: {},{},{}", light.pos[0], light.pos[1], light.pos[2]);
-                        // println!("hit: {},{},{}", hit_info.point[0], hit_info.point[1], hit_info.point[2]);
-                        // println!("next_hit_point: {},{},{}", next_hit_point[0], next_hit_point[1], next_hit_point[2]);
-                        //
-                        // println!("ray point: {},{},{}", new_ray.orig[0], new_ray.orig[1], new_ray.orig[2]);
-                        // println!("ray dir: {},{},{}", new_ray.dir[0], new_ray.dir[1], new_ray.dir[2]);
+                        // let next_hit_point = new_ray.point_along(dist);
                         in_shadow = true;
                         break;
                     }
                     (_, _) => {}
                 }
             }
-            if in_shadow {
-                let ambient_colour:RGB = hit_info.material.rgb.multiply(ambient);
-                colour_pts.push(ambient_colour);
-            } else {
-                let ambient_colour:RGB = hit_info.material.rgb.multiply(ambient);
+            if !in_shadow {
                 let dot_n = hit_to_light.normalize().dot(&hit_info.normal);
-
-                // if hit_info.point[1] > 2.9 && hit_info.point[2] > 5.9 && hit_info.point[2] < 6.1 {
-                //     println!("dot_n: {}",dot_n);
-                //     println!("hit point: {:?}",hit_info.point);
-                // }
-
                 let diff_frac = if dot_n > 0.0 {
-                    dot_n * hit_info.material.diffuse
+                    dot_n * hit_info.material.diffuse * light.intensity
                 } else {
                   0.0
                 };
+                let light_reflect =  hit_to_light.normalize() - 2.0 * dot_n * &hit_info.normal;
+                let spec_frac:f64 = (light_reflect.dot(&ray.dir.normalize())).max(0.0).powi(2) * hit_info.material.specular * light.intensity;
+                let spec_colour:RGB = hit_info.material.rgb.multiply(spec_frac);
+                // let diffuse_colour:RGB = RGB::new(0,0,0);
                 let diffuse_colour:RGB = hit_info.material.rgb.multiply(diff_frac);
                 colour_pts.push(RGB{
-                    r: ambient_colour.r + diffuse_colour.r,
-                    g: ambient_colour.g + diffuse_colour.g,
-                    b: ambient_colour.b + diffuse_colour.b
+                    r: std::cmp::min(spec_colour.r + diffuse_colour.r, 255),
+                    g: std::cmp::min(spec_colour.g + diffuse_colour.g, 255),
+                    b: std::cmp::min(spec_colour.b + diffuse_colour.b, 255)
                 });
             }
         }
-        let mut r = 0;
-        let mut g = 0;
-        let mut b = 0;
+        let mut r:u32 = 0;
+        let mut g:u32 = 0;
+        let mut b:u32 = 0;
         let size = colour_pts.len() as u8;
         for colour in colour_pts {
-            r += colour.r;
-            g += colour.g;
-            b += colour.b;
+            r += colour.r as u32;
+            g += colour.g as u32;
+            b += colour.b as u32;
         }
-        r = r / size as u8;
-        g = g / size as u8;
-        b = b / size as u8;
+        if size > 0 {
+            r = r / size as u32;
+            g = g / size as u32;
+            b = b / size as u32;
+        }
         return Some(RGB {
-            r,
-            g,
-            b,
+            r: std::cmp::min(r + ambient_colour.r as u32, 255) as u8,
+            g: std::cmp::min(g + ambient_colour.g as u32, 255) as u8,
+            b: std::cmp::min(b + ambient_colour.b as u32, 255) as u8
         });
     }
 }

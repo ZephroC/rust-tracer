@@ -11,13 +11,14 @@ pub struct Plane {
 }
 
 impl Plane {
-    pub fn new(point: Vector3<f64>, norm: Vector3<f64>, colour: RGB) -> Plane {
+    pub fn new(point: Vector3<f64>, norm: Vector3<f64>, colour: RGB, diffuse:f64, specular:f64) -> Plane {
         Plane {
             point,
-            norm,
+            norm: norm.normalize(),
             material: Material {
                 rgb: colour,
-                diffuse: 0.6
+                diffuse,
+                specular
             }
         }
     }

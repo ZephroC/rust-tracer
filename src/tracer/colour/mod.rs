@@ -1,5 +1,4 @@
-
-
+//TODO I also want float 0.0-1.0 versions as switching between floats and u8s is annoying me.
 pub struct RGB {
     pub r: u8,
     pub g: u8,
@@ -7,6 +6,10 @@ pub struct RGB {
 }
 
 impl RGB {
+    pub fn new(r:u8,g:u8,b:u8) -> RGB {
+        RGB { r, g, b}
+    }
+
     pub fn multiply(&self, fraction:f64) -> RGB {
         RGB {
             r: mult_channel(self.r,fraction),
@@ -14,7 +17,6 @@ impl RGB {
             b: mult_channel(self.b,fraction),
         }
     }
-
 }
 
 fn mult_channel(chn:u8, fraction: f64 ) -> u8 {
@@ -25,5 +27,6 @@ fn mult_channel(chn:u8, fraction: f64 ) -> u8 {
 
 pub struct Material {
     pub rgb:RGB,
-    pub diffuse:f64
+    pub diffuse:f64,
+    pub specular:f64
 }

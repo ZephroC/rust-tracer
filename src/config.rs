@@ -6,6 +6,7 @@ pub struct Config {
     pub filename: String,
     pub threads: u8,
     pub resolution: Resolution,
+    pub samples: u8
 }
 
 pub fn parse_args(args: Vec<String>) -> Config {
@@ -15,6 +16,7 @@ pub fn parse_args(args: Vec<String>) -> Config {
     opts.optopt("h", "height", "window height", "window height");
     opts.optopt("", "help", "window height", "window height");
     opts.optopt("w", "width", "window width", "window width");
+    opts.optopt("s", "samples", "pixel super samples", "pixel super samples");
 
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
@@ -29,6 +31,7 @@ pub fn parse_args(args: Vec<String>) -> Config {
     let height: u16 = matches.opt_get_default("h", 720).unwrap();
     let width: u16 = matches.opt_get_default("w", 1280).unwrap();
     let threads: u8 = matches.opt_get_default("t", 1).unwrap();
+    let samples: u8 = matches.opt_get_default("s", 8).unwrap();
     let file: String = matches
         .opt_get_default("f", "scene.yml".to_string())
         .unwrap();
@@ -36,6 +39,7 @@ pub fn parse_args(args: Vec<String>) -> Config {
         filename: file.clone(),
         threads,
         resolution: Resolution { width, height },
+        samples
     }
 }
 
