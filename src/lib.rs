@@ -1,6 +1,7 @@
 pub mod tracer;
 pub mod config;
 pub mod window;
+pub mod buffer;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Resolution {

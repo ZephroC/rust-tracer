@@ -4,12 +4,14 @@ use ggez::GameResult;
 use nalgebra::Vector3;
 use serde_yaml::Value;
 
-use rust_tracer::{window, config};
+use rust_tracer::{window, config, buffer};
 use rust_tracer::tracer::{Camera, SceneState, PointLight};
 use rust_tracer::tracer::geom::sphere::Sphere;
 use rust_tracer::tracer::geom::Drawable;
 use rust_tracer::tracer::colour::RGB;
 use rust_tracer::tracer::geom::plane::Plane;
+use rand::seq::index::sample;
+use std::sync::RwLock;
 
 fn unwrap_xyz(xyz: &serde_yaml::Value) -> Vector3<f64> {
     nalgebra::Vector3::new(
@@ -72,5 +74,13 @@ pub fn main() -> GameResult {
     let ambient = deserialised["ambient"].as_f64().unwrap();
     let background = unwrap_rgb(&deserialised["background"]);
     let scene = SceneState { geom, point_lights, camera, ambient, background_colour: background };
-    window::run(config.resolution,&scene, config.samples)
+    let mut frame_buffer = buffer::FrameBuffer::new(config.resolution);
+
+    {
+        let mut write_target = frame_buffer.write_buffer().write().unwrap();
+        scene.rasterise((*write_target).as_mut(), &config.resolution, config.samples);
+    }
+    frame_buffer.swap();
+
+    window::run(config.resolution, &frame_buffer)
 }
