@@ -11,14 +11,15 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(pos: Vector3<f64>, radius: f64, colour: RGB, diffuse:f64, specular:f64) -> Sphere {
+    pub fn new(pos: Vector3<f64>, radius: f64, colour: RGB, diffuse:f64, specular:f64, specular_exp:f64) -> Sphere {
         Sphere {
             pos,
             radius,
             material: Material {
                 rgb: colour,
                 diffuse,
-                specular
+                specular,
+                specular_exp
             }
         }
     }
@@ -69,7 +70,8 @@ mod tests {
 
     #[test]
     fn test_intersects() {
-        let sphere = Sphere::new(Vector3::new(0.0,0.0,3.0), 1.0, RGB{r:0,g:0,b:0});
+        let sphere = Sphere::new(Vector3::new(0.0,0.0,3.0), 1.0, RGB{r:0,g:0,b:0},
+        0.6,0.4,2.0);
         let ray = Ray{
             orig: Vector3::new(0.0,0.0,0.0),
             dir: Vector3::new(0.0, 0.0, 1.0)
@@ -81,7 +83,8 @@ mod tests {
         approx::assert_ulps_eq!(-1.0, norm.unwrap()[2],max_ulps = 3);
         approx::assert_ulps_eq!(1.0, norm.unwrap().magnitude() , max_ulps=3);
 
-        let sphere = Sphere::new(Vector3::new(2.0,2.0,0.0), 1.0, RGB{r:0,g:0,b:0});
+        let sphere = Sphere::new(Vector3::new(2.0,2.0,0.0), 1.0, RGB{r:0,g:0,b:0},
+        0.6,0.4,2.0);
         let ray = Ray{
             orig: Vector3::new(0.0,0.0,0.0),
             dir: Vector3::new(1.0, 1.0, 0.0)

@@ -16,11 +16,12 @@ spheres:
       z: 6.0
     material:
       diffuse: 0.6
-      specular: 0.4
+      specular: 0.8
+      specular_exp: 2.0
       colour:
-        r: 255
+        r: 200
         g: 0
-        b: 255
+        b: 200
   - radius: 3.0
     pos:
       x: 1.0
@@ -29,9 +30,10 @@ spheres:
     material:
       diffuse: 0.6
       specular: 0.4
+      specular_exp: 2.0
       colour:
-        r: 255
-        g: 255
+        r: 200
+        g: 0
         b: 0
 planes:
   - norm:
@@ -43,8 +45,9 @@ planes:
       y: -4.0
       z: 0.0
     material:
-      diffuse: 0.6
-      specular: 0.4
+      diffuse: 0.8
+      specular: 0.2
+      specular_exp: 2.0
       colour:
         r: 255
         g: 255
@@ -58,12 +61,13 @@ planes:
       y: 0.0
       z: 16.0
     material:
-      diffuse: 0.6
-      specular: 0.4
+      diffuse: 0.8
+      specular: 0.2
+      specular_exp: 2.0
       colour:
         r: 255
-        g: 128
-        b: 0
+        g: 255
+        b: 255
 point_lights:
   - pos:
       x: -3.0

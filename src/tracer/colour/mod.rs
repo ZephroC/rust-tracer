@@ -28,5 +28,6 @@ fn mult_channel(chn:u8, fraction: f64 ) -> u8 {
 pub struct Material {
     pub rgb:RGB,
     pub diffuse:f64,
-    pub specular:f64
+    pub specular:f64,
+    pub specular_exp:f64
 }

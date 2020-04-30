@@ -183,7 +183,7 @@ impl SceneState {
                   0.0
                 };
                 let light_reflect =  hit_to_light.normalize() - 2.0 * dot_n * &hit_info.normal;
-                let spec_frac:f64 = (light_reflect.dot(&ray.dir.normalize())).max(0.0).powi(2) * hit_info.material.specular * light.intensity;
+                let spec_frac:f64 = (light_reflect.dot(&ray.dir.normalize())).max(0.0).powf(hit_info.material.specular_exp) * hit_info.material.specular * light.intensity;
                 let spec_colour:RGB = hit_info.material.rgb.multiply(spec_frac);
                 // let diffuse_colour:RGB = RGB::new(0,0,0);
                 let diffuse_colour:RGB = hit_info.material.rgb.multiply(diff_frac);

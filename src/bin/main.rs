@@ -50,7 +50,8 @@ pub fn main() -> GameResult {
             sphere["radius"].as_f64().unwrap(),
             unwrap_rgb(&sphere["material"]["colour"]),
             sphere["material"]["diffuse"].as_f64().unwrap(),
-           sphere["material"]["specular"].as_f64().unwrap()
+           sphere["material"]["specular"].as_f64().unwrap(),
+            sphere["material"]["specular_exp"].as_f64().unwrap()
             )
         ));
     }
@@ -61,7 +62,9 @@ pub fn main() -> GameResult {
             unwrap_xyz(&plane["norm"]),
             unwrap_rgb(&plane["material"]["colour"]),
             plane["material"]["diffuse"].as_f64().unwrap(),
-            plane["material"]["specular"].as_f64().unwrap()        )));
+            plane["material"]["specular"].as_f64().unwrap(),
+            plane["material"]["specular_exp"].as_f64().unwrap()
+        )));
     }
 
     for point_light in deserialised["point_lights"].as_sequence().unwrap() {

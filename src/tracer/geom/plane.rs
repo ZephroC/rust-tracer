@@ -11,14 +11,15 @@ pub struct Plane {
 }
 
 impl Plane {
-    pub fn new(point: Vector3<f64>, norm: Vector3<f64>, colour: RGB, diffuse:f64, specular:f64) -> Plane {
+    pub fn new(point: Vector3<f64>, norm: Vector3<f64>, colour: RGB, diffuse:f64, specular:f64, specular_exp:f64) -> Plane {
         Plane {
             point,
             norm: norm.normalize(),
             material: Material {
                 rgb: colour,
                 diffuse,
-                specular
+                specular,
+                specular_exp
             }
         }
     }
@@ -58,7 +59,8 @@ mod tests {
 
     #[test]
     fn test_intersects() {
-        let sphere = Plane::new(Vector3::new(0.0,0.0,3.0), Vector3::new(0.0,0.0,-1.0), RGB{r:0,g:0,b:0});
+        let sphere = Plane::new(Vector3::new(0.0,0.0,3.0), Vector3::new(0.0,0.0,-1.0), RGB{r:0,g:0,b:0},
+        0.6,0.4, 2.0);
         let ray = Ray{
             orig: Vector3::new(0.0,0.0,0.0),
             dir: Vector3::new(0.0, 0.0, 1.0)
